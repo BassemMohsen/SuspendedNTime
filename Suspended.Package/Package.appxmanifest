@@ -11,7 +11,7 @@
   <Identity
     Name="BassemNomany.SuspendedNTime"
     Publisher="CN=0E013939-CEFB-4F80-B4B4-B857260CB91A"
-    Version="1.0.65.0" />
+    Version="1.0.0.0" />
 
   <Properties>
     <DisplayName>Suspended N Time</DisplayName>
@@ -63,8 +63,8 @@
 				  <FavoriteAfterInstall>true</FavoriteAfterInstall>
 				 <SupportsPinning>true</SupportsPinning>
 				  <ActivationUri>ms-gamebarwidget://Suspended.XboxGameBarUI</ActivationUri>
-				  <Icon>Assets\Performance_icon.png</Icon>
-				  <Logo>Assets\Performance_icon.png</Logo>
+				  <Icon>Assets\suspended.png</Icon>
+				  <Logo>Assets\suspended.png</Logo>
                 <Window>
                   <Size>
                     <Height>650</Height>

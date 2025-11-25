@@ -159,24 +159,45 @@ namespace Suspended
         private void AutoSuspedToggle_Toggled(object sender, RoutedEventArgs e)
         {
             // handle Auto Suspend toggle changes
-
+            // handle Enhanced Sleep toggle changes
+            if (sender is ToggleSwitch toggleSwitch)
+            {
+                _model.SetAutoSuspendEnabledVar(toggleSwitch.IsOn);
+            }
         }
 
         private void PowerButtonActionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Handle Power Button Presses
+            if (sender is ComboBox combo && combo.SelectedItem is ComboBoxItem item)
+            {
+                // Extract the Tag (0, 1, or 2)
+                if (item.Tag is double tagValue)
+                {
+                    if (DataContext is MainPageModelWrapper model)
+                    {
+                        _model.SetPowerButtonActionVar(tagValue);
+                    }
+                }
+            }
         }
 
         private void EnhancedSleepToggle_Toggled(object sender, RoutedEventArgs e)
         {
             // handle Enhanced Sleep toggle changes
-
+            if (sender is ToggleSwitch toggleSwitch)
+            {
+                _model.SetEnhancedSleepEnabledVar(toggleSwitch.IsOn);
+            }
         }
 
         private void GoBackToSleepToggle_Toggled(object sender, RoutedEventArgs e)
         {
             // handle Go back to sleep changes
-
+            if (sender is ToggleSwitch toggleSwitch)
+            {
+                _model.SetGoBackToSleepEnabledVar(toggleSwitch.IsOn);
+            }
         }
     }
 }

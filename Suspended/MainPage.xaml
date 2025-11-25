@@ -126,15 +126,14 @@
 
                     <!-- Label Text -->
                     <TextBlock
-                        Grid.Column="0"
-                        Text="Suspend game in focus before sleeping"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Left"
-                        FontSize="18"
-                        FontWeight="Bold"
-                        TextWrapping="WrapWholeWords"
-                        Margin="0,0,16,0"/>
-
+                    Grid.Column="0"
+                    Text="Suspend game in focus before sleeping"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
+                    FontSize="18"
+                    FontWeight="Bold"
+                    TextWrapping="WrapWholeWords"
+                    Margin="0,0,16,0"/>
                     <!-- ToggleSwitch -->
                     <ToggleSwitch
                         x:Name="AutoSuspendToggle"
@@ -143,7 +142,7 @@
                         OnContent="On"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Right"
-                        IsOn="{Binding AutoSuspendEnabled, Mode=TwoWay}"
+                        IsOn="{Binding AutoSuspendEnabled, Mode=OneWay}"
                         Toggled="AutoSuspedToggle_Toggled"
                         XYFocusUp="{x:Bind ResumeButton}"
                         XYFocusDown="{x:Bind PowerButtonActionComboBox}" />
@@ -159,7 +158,7 @@
                     <ComboBox x:Name="PowerButtonActionComboBox"
                               HorizontalAlignment="Stretch"
                               SelectionChanged="PowerButtonActionComboBox_SelectionChanged"
-                              SelectedValue="{Binding PowerButtonAction, Mode=TwoWay}"
+                              SelectedValue="{Binding PowerButtonAction, Mode=OneWay}"
                               FontSize="18"
                               Height="40"
                               Margin="5,0,5,0"
@@ -201,7 +200,7 @@
                             VerticalAlignment="Center"
                             Margin="0,0,5,0"/>
 
-                    <TextBlock Text="More power efficient and reduces wakeups during sleep"
+                            <TextBlock Text="Optimized modern sleep power policies for handhelds"
                                TextWrapping="WrapWholeWords"
                                 FontWeight="SemiBold"
                                 FontSize="12"
@@ -235,7 +234,7 @@
                         OnContent="On"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Right"
-                        IsOn="{Binding EnhancedSleepEnabled, Mode=TwoWay}"
+                        IsOn="{Binding EnhancedSleepEnabled, Mode=OneWay}"
                         Toggled="EnhancedSleepToggle_Toggled"
                         XYFocusUp="{x:Bind PowerButtonActionComboBox}"
                         XYFocusDown="{x:Bind GoBackToSleepToggle}"/>
@@ -267,7 +266,7 @@
                         <!-- Label Text -->
                         <TextBlock
                         Grid.Column="0"
-                        Text="Auto Go back to sleep"
+                        Text="Re-Sleep automatically"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Left"
                         FontSize="18"
@@ -283,7 +282,7 @@
                         OnContent="On"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Right"
-                        IsOn="{Binding GoBackToSleepEnabled, Mode=TwoWay}"
+                        IsOn="{Binding GoBackToSleepEnabled, Mode=OneWay}"
                         Toggled="GoBackToSleepToggle_Toggled"
                         XYFocusUp="{x:Bind EnhancedSleepToggle}" />
                     </Grid>

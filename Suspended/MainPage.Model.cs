@@ -74,8 +74,20 @@ namespace Suspended
                     {
                         _base.autoSuspendEnabled = value;
                         _base.Notify("AutoSuspendEnabled");
-                        Backend.Instance.Send($"set-auto-suspend {Convert.ToInt32(value)}");
                     }
+                }
+            }
+        }
+
+        public void SetAutoSuspendEnabledVar(bool value)
+        {
+            lock (_base)
+            {
+                if (_base.autoSuspendEnabled != value)
+                {
+                    _base.autoSuspendEnabled = value;
+                    Backend.Instance.Send($"set-auto-suspend {Convert.ToInt32(value)}");
+                    _base.Notify("AutoSuspendEnabled");
                 }
             }
         }
@@ -91,8 +103,20 @@ namespace Suspended
                     {
                         _base.goBackToSleepEnabled = value;
                         _base.Notify("GoBackToSleepEnabled");
-                        Backend.Instance.Send($"set-go-back-to-sleep {Convert.ToInt32(value)}");
                     }
+                }
+            }
+        }
+
+        public void SetGoBackToSleepEnabledVar(bool value)
+        {
+            lock (_base)
+            {
+                if (_base.goBackToSleepEnabled != value)
+                {
+                    _base.goBackToSleepEnabled = value;
+                    Backend.Instance.Send($"set-go-back-to-sleep {Convert.ToInt32(value)}");
+                    _base.Notify("GoBackToSleepEnabled");
                 }
             }
         }
@@ -108,8 +132,20 @@ namespace Suspended
                     {
                         _base.powerButtonAction = value;
                         _base.Notify("PowerButtonAction");
-                        Backend.Instance.Send($"set-power-button-action {value}");
                     }
+                }
+            }
+        }
+
+        public void SetPowerButtonActionVar(double value)
+        {
+            lock (_base)
+            {
+                if (_base.powerButtonAction != value)
+                {
+                    _base.powerButtonAction = value;
+                    Backend.Instance.Send($"set-power-button-action {Convert.ToInt32(value)}");
+                    _base.Notify("PowerButtonAction");
                 }
             }
         }
@@ -125,8 +161,20 @@ namespace Suspended
                     {
                         _base.enhancedSleepEnabled = value;
                         _base.Notify("EnhancedSleepEnabled");
-                        Backend.Instance.Send($"set-enhanced-sleep {Convert.ToInt32(value)}");
                     }
+                }
+            }
+        }
+
+        public void SetEnhancedSleepEnabledVar(bool value)
+        {
+            lock (_base)
+            {
+                if (_base.enhancedSleepEnabled != value)
+                {
+                    _base.enhancedSleepEnabled = value;
+                    Backend.Instance.Send($"set-enhanced-sleep {Convert.ToInt32(value)}");
+                    _base.Notify("EnhancedSleepEnabled");
                 }
             }
         }

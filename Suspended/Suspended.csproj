@@ -65,7 +65,8 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\Performance_icon.png">
+    <Content Include="Assets\info.png" />
+    <Content Include="Assets\suspended.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Properties\Default.rd.xml" />
