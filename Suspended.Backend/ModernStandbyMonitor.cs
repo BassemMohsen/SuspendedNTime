@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Suspended.Backend;
+using System;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Xml.Linq;
-using Suspended.Backend;
 
 class ModernStandbyMonitor
 {
@@ -34,7 +35,7 @@ class ModernStandbyMonitor
         Console.WriteLine("[ModernStandbyMonitor] Watching for sleep (506) / wake (507) events...");
     }
 
-    private void SuspendSystem()
+    private async Task SuspendSystem()
     {
         SendMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_SUSPEND, 2);
     }
@@ -61,7 +62,7 @@ class ModernStandbyMonitor
         {
             Console.WriteLine($"[ModernStandbyMonitor] System entered Modern Standby at {eventTime:yyyy-MM-dd HH:mm:ss}");
             if(autoSuspendSetting == 1)
-                GameSuspendController.SuspendForegroundApp();
+                _ = GameSuspendController.SuspendForegroundApp();
         }
         else if (eventId == 507)
         {
@@ -77,16 +78,16 @@ class ModernStandbyMonitor
 
                     // Resume foreground app, so that they can respond to SC_SUSPEND
                     if (autoSuspendSetting == 1)
-                        GameSuspendController.ResumeForegroundApp();
+                        _ = GameSuspendController.ResumeForegroundApp();
 
-                    SuspendSystem();
+                    _ = SuspendSystem();
                 }
             }
             else
             {
                 // It's power button, resume foreground app
                 if (autoSuspendSetting == 1)
-                    GameSuspendController.ResumeForegroundApp();
+                    _ = GameSuspendController.ResumeForegroundApp();
             }
         }
     }

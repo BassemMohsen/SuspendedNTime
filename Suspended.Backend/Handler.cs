@@ -34,7 +34,10 @@ namespace Suspended.Backend
         {
             powerPolicyController = new PowerPolicyController();
             modernStandbymonitor = new ModernStandbyMonitor();
-		}
+
+            var manager = new WindowProcessManager(TimeSpan.FromMilliseconds(2500));
+
+        }
 
         public void Register(Communication comm)
         {

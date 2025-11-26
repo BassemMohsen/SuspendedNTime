@@ -144,14 +144,14 @@
                         HorizontalAlignment="Right"
                         IsOn="{Binding AutoSuspendEnabled, Mode=OneWay}"
                         Toggled="AutoSuspedToggle_Toggled"
-                        XYFocusUp="{x:Bind ResumeButton}"
+                        XYFocusUp="{x:Bind SuspendButton}"
                         XYFocusDown="{x:Bind PowerButtonActionComboBox}" />
                 </Grid>
 
                 <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="8" Padding="10" Margin="0,15,0,15">
                 <!-- Power Button Action -->
                     <StackPanel>
-                        <StackPanel Orientation="Vertical" Spacing="4" Margin="0,10,0,10">
+                        <StackPanel Orientation="Vertical" Spacing="4" Margin="0,10,0,20">
                     <TextBlock Text="Power button action"
                                FontSize="18"
                                Margin="0,0,0,4" FontWeight="Bold"/>
@@ -193,20 +193,8 @@
                             </ComboBox>
                 </StackPanel>
 
-                <!-- Enhanced Sleep toggle - Reduce Random Windows Wakeups-->
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10,0,0">
-                    <Image Source="ms-appx:///Assets//info.png"
-                            Width="12" Height="12"
-                            VerticalAlignment="Center"
-                            Margin="0,0,5,0"/>
 
-                            <TextBlock Text="Optimized modern sleep power policies for handhelds"
-                               TextWrapping="WrapWholeWords"
-                                FontWeight="SemiBold"
-                                FontSize="12"
-                                VerticalAlignment="Center"/>
-                </StackPanel>
-                        <Grid Margin="0,0,0,10">
+                        <Grid Margin="0,0,0,20">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <!-- Text takes available space -->
@@ -215,16 +203,29 @@
                             </Grid.ColumnDefinitions>
 
 
-                            <!-- Label Text -->
+                            <StackPanel Orientation="Vertical" Grid.Column="0" Margin="0,0,16,0">
                             <TextBlock
-                        Grid.Column="0"
                         Text="Enhanced sleep"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Left"
                         FontSize="18"
                         FontWeight="Bold"
-                        TextWrapping="WrapWholeWords"
-                        Margin="0,0,16,0"/>
+                        TextWrapping="WrapWholeWords"/>
+
+                                <!-- Enhanced Sleep toggle - Reduce Random Windows Wakeups-->
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10,0,0">
+                                    <Image Source="ms-appx:///Assets//info.png"
+                                    Width="12" Height="12"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,5,0"/>
+
+                                    <TextBlock Text="Optimize modern sleep power policies for handhelds"
+                                       TextWrapping="WrapWholeWords"
+                                        FontWeight="SemiBold"
+                                        FontSize="12"
+                                        VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </StackPanel>
 
                             <!-- ToggleSwitch -->
                             <ToggleSwitch
@@ -241,41 +242,40 @@
                         </Grid>
 
 
-                    <!-- Automatically go back to sleep if woken up for any reason but Power button -->
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10,0,0">
-                        <Image Source="ms-appx:///Assets//info.png"
-                            Width="12" Height="12"
-                            VerticalAlignment="Center"
-                            Margin="0,0,5,0"/>
-
-                            <TextBlock Text="If windows had a wakeup for any reason but Power button"
-                               TextWrapping="WrapWholeWords"
-                                FontWeight="SemiBold"
-                                FontSize="12"
-                                VerticalAlignment="Center"/>
-                        </StackPanel>
-                    <Grid Margin="0,0,0,10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <!-- Text takes available space -->
-                            <ColumnDefinition Width="Auto" />
-                            <!-- Toggle only as wide as needed -->
-                        </Grid.ColumnDefinitions>
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <!-- Text takes available space -->
+                                <ColumnDefinition Width="Auto" />
+                                <!-- Toggle only as wide as needed -->
+                            </Grid.ColumnDefinitions>
 
 
-                        <!-- Label Text -->
-                        <TextBlock
-                        Grid.Column="0"
-                        Text="Re-Sleep automatically"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Left"
-                        FontSize="18"
-                        FontWeight="Bold"
-                        TextWrapping="WrapWholeWords"
-                        Margin="0,0,16,0"/>
+                            <StackPanel Orientation="Vertical" Grid.Column="0" Margin="0,0,16,0">
+                                <TextBlock
+                                Text="Re-Sleep automatically"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Left"
+                                FontSize="18"
+                                FontWeight="Bold"
+                                TextWrapping="WrapWholeWords"/>
+                                <!-- Automatically go back to sleep if woken up for any reason but Power button -->
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10,0,0">
+                                    <Image Source="ms-appx:///Assets//info.png"
+                                    Width="12" Height="12"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,5,0"/>
 
-                        <!-- ToggleSwitch -->
-                        <ToggleSwitch
+                                    <TextBlock Text="Send device back to sleep if woke up for any reason but Power button"
+                                   TextWrapping="WrapWholeWords"
+                                    FontWeight="SemiBold"
+                                    FontSize="12"
+                                    VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                    <!-- ToggleSwitch -->
+                            <ToggleSwitch
                         x:Name="GoBackToSleepToggle"
                         Grid.Column="1"
                         OffContent="Off"
@@ -285,7 +285,7 @@
                         IsOn="{Binding GoBackToSleepEnabled, Mode=OneWay}"
                         Toggled="GoBackToSleepToggle_Toggled"
                         XYFocusUp="{x:Bind EnhancedSleepToggle}" />
-                    </Grid>
+                        </Grid>
                     </StackPanel>
                 </Border>
             </StackPanel>

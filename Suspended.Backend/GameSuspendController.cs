@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace Suspended.Backend
 {
@@ -58,6 +59,17 @@ namespace Suspended.Backend
             public string szExeFile;
         }
 
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        private const int SW_MINIMIZE = 6;
+        private const int SW_SHOWMINIMIZED = 2;
+        private const int SW_FORCEMINIMIZE = 11;
+        private const int SW_RESTORE = 9;
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
+
         // Whitelisted processes that should never be suspended
         private static readonly string[] WhitelistedProcesses =
         {
@@ -76,7 +88,7 @@ namespace Suspended.Backend
             "WindowsTerminal",
         };
 
-        private static bool IsProcessSuspended(Process process)
+        public static bool IsProcessSuspended(Process process)
         {
             try
             {
@@ -104,7 +116,7 @@ namespace Suspended.Backend
                 string.Equals(p, processName, StringComparison.OrdinalIgnoreCase));
         }
 
-        public static void SuspendForegroundApp()
+        public static async Task SuspendForegroundApp()
         {
             IntPtr hwnd = GetForegroundWindow();
             if (hwnd == IntPtr.Zero)
@@ -131,7 +143,13 @@ namespace Suspended.Backend
                         return;
                     }
 
-                    Console.WriteLine($"[GameSuspendController] Suspending process: {process.ProcessName} ({processId})");
+                    // Minimize the window first to avoid issues with certain games
+                    ShowWindowAsync(hwnd, SW_FORCEMINIMIZE);
+
+                    // 500 ms delay (async, does NOT block the caller)
+                    await Task.Delay(500);
+
+                    Console.WriteLine($"[GameSuspendController] Minimized and Suspending process: {process.ProcessName} ({processId})");
                     SuspendProcessTree(process.Id);
                 }
             }
@@ -141,7 +159,7 @@ namespace Suspended.Backend
             }
         }
 
-        public static void ResumeForegroundApp()
+        public static async Task ResumeForegroundApp()
         {
             IntPtr hwnd = GetForegroundWindow();
             if (hwnd == IntPtr.Zero)
@@ -164,6 +182,9 @@ namespace Suspended.Backend
 
                     Console.WriteLine($"[GameSuspendController] Resuming process: {process.ProcessName} ({processId})");
                     ResumeProcessTree(process.Id);
+
+                    // After resuming, restore the window
+                    ShowWindowAsync(hwnd, SW_RESTORE);
                 }
             }
             catch (Exception ex)
