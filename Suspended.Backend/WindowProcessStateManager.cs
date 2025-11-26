@@ -157,15 +157,22 @@ namespace Suspended.Backend
                 return true; // skip windows with no title
 
             // process executable
-            String processName;
-            using (var process = Process.GetProcessById((int)pid))
+            String processName = "";
+            try
             {
-                    processName = process.ProcessName;
-                    if (IsWhitelisted(process.ProcessName))
-                    {
-                        //Console.WriteLine($"[GameSuspendController] Skipping whitelisted process: {process.ProcessName}");
-                        return true; // skip windows with no title
-                    }
+                using (var process = Process.GetProcessById((int)pid))
+                {
+                        processName = process.ProcessName;
+                        if (IsWhitelisted(process.ProcessName))
+                        {
+                            //Console.WriteLine($"[GameSuspendController] Skipping whitelisted process: {process.ProcessName}");
+                            return true; // skip windows with no title
+                        }
+                }
+            }
+            catch
+            {
+                return true; // process no longer exists → skip
             }
 
             if (!windows.ContainsKey(hWnd))
@@ -238,6 +245,15 @@ namespace Suspended.Backend
             try
             {
                 var process = Process.GetProcessById(pid);
+
+                if (process.Threads.Count > 0)
+                {
+                    var t = process.Threads[0];
+                    return t.ThreadState == System.Diagnostics.ThreadState.Wait &&
+                           t.WaitReason == ThreadWaitReason.Suspended;
+                }
+
+                /*
                 foreach (ProcessThread thread in process.Threads)
                 {
                     if (thread.ThreadState == System.Diagnostics.ThreadState.Wait &&
@@ -245,7 +261,7 @@ namespace Suspended.Backend
                     {
                         return true;
                     }
-                }
+                }*/
             }
             catch { }
             return false;
