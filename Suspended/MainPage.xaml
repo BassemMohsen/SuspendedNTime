@@ -24,6 +24,8 @@
         <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#6B7584"/>
         <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#555D69"/>
         <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="#3A3F46"/>
+        <SolidColorBrush x:Key="RunningColorBrush" Color="Green"/>
+        <SolidColorBrush x:Key="SuspendedColorBrush" Color="DarkOrange"/>
         <StaticResource x:Key="RepeatButtonBackground" ResourceKey="ButtonBackground"/>
         <StaticResource x:Key="RepeatButtonBackgroundPointerOver" ResourceKey="ButtonBackgroundPointerOver"/>
         <StaticResource x:Key="RepeatButtonBackgroundPressed" ResourceKey="ButtonBackgroundPressed"/>
@@ -35,6 +37,37 @@
         <CornerRadius x:Key="ControlCornerRadius">8,8,8,8</CornerRadius>
         <Thickness x:Key="ButtonPadding">15,10,15,11</Thickness>
         <local:BooleanToVisibilityConverter  x:Key="BooleanToVisibilityConverter"/>
+        <local:IconConverter  x:Key="IconConverter"/>
+        <local:BooleanToSuspendedStateConverter  x:Key="BooleanToSuspendedStateConverter"/>
+        <local:BooleanToNegativeVisibilityConverter x:Key="BooleanToNegativeVisibilityConverter"/>
+        <local:ColorToSuspendedStateConverter  x:Key="ColorToSuspendedStateConverter"
+                                               SuspendedBrush="{StaticResource SuspendedColorBrush}"
+                                               RunningBrush="{StaticResource RunningColorBrush}"/>
+
+        <Style x:Key="RoundedListViewItemStyle" TargetType="ListViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Grid x:Name="Root" Background="Transparent">
+                            <ListViewItemPresenter
+                            x:Name="Presenter"
+                            CheckBrush="{ThemeResource SystemControlForegroundBaseMediumHighBrush}"
+                            CheckMode="Inline"
+                            ContentMargin="0"
+                            SelectionCheckMarkVisualEnabled="True"
+                            CornerRadius="12"
+                            SelectedBackground="LightGray"
+                            SelectedForeground="Black"
+                            PointerOverBackground="Gainsboro"
+                            />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </Page.Resources>
 
     <Grid Padding="12">
@@ -69,7 +102,7 @@
                        Grid.Row="1">
 
 
-            <StackPanel x:Name="MainPanel" Orientation="Vertical" Margin="15,0,15,0">
+            <StackPanel x:Name="MainPanel" Orientation="Vertical" Margin="15,0,15,15">
                 
                 
                 <!-- Resume and Suspend Games -->
@@ -88,13 +121,11 @@
                     Width="190"
                     Height="44"
                     HorizontalAlignment="Left"
-                    Click="OnResumeButtonClick"
-                    XYFocusUp="{x:Bind LaunchBackendButton}"
-                    XYFocusDown="{x:Bind AutoSuspendToggle}">
+                    Click="OnResumeButtonClick">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
                             <FontIcon Glyph="&#xE768;" FontSize="18"/>
                             <!-- Play icon -->
-                            <TextBlock Text="Resume Game" FontSize="18"/>
+                            <TextBlock Text="Resume" FontSize="18"/>
                         </StackPanel>
                     </Button>
 
@@ -105,18 +136,59 @@
                     Width="190"
                     Height="44"
                     HorizontalAlignment="Right"
-                    Click="OnSuspendButtonClick"
-                    XYFocusUp="{x:Bind LaunchBackendButton}"
-                    XYFocusDown="{x:Bind AutoSuspendToggle}">
+                    Click="OnSuspendButtonClick">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
                             <FontIcon Glyph="&#xE769;" FontSize="18"/>
                             <!-- Pause icon -->
-                            <TextBlock Text="Suspend Game" FontSize="18"/>
+                            <TextBlock Text="Suspend" FontSize="18"/>
                         </StackPanel>
                     </Button>
                 </Grid>
 
-                <Grid Margin="0,10,0,10">
+                <ListView x:Name="GameListListView"
+                          ItemsSource="{Binding GamesList}"
+                          IsItemClickEnabled="True"
+                          ItemClick="GamesListView_ItemClick"
+                          Margin="0,15,0,15"
+                          XYFocusDown="{x:Bind AutoSuspendToggle}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,15,0,15">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <!-- 0: Icon -->
+                                    <ColumnDefinition Width="*"/>
+                                    <!-- 1: Text -->
+                                    <ColumnDefinition Width="Auto"/>
+                                    <!-- 2: FontIcon(s) -->
+                                </Grid.ColumnDefinitions>
+                                <!-- Process Icon -->
+                                <Image Width="64" Height="64" Grid.Column="0"
+                               Source="ms-appx:///Assets//info.png" HorizontalAlignment="Left">
+                                </Image>
+
+                                <StackPanel x:Name="GameTextStack" Grid.Column="1" Orientation="Vertical" Margin="15,0,0,0">
+
+                                    <TextBlock FontWeight="Bold" FontSize="18" Text="{Binding Title}" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding IsSuspended, Converter={StaticResource BooleanToSuspendedStateConverter}}"
+                                               Foreground="{Binding IsSuspended, Converter={StaticResource ColorToSuspendedStateConverter}}"
+                                               FontSize="16"/>
+                                </StackPanel>
+
+                                <!-- Resume Icon -->
+                                <FontIcon Glyph="&#xE768;" FontSize="18" Grid.Column="2"
+                                          Visibility="{Binding IsSuspended, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                
+                                <!-- Suspend Icon -->
+                                <FontIcon Glyph="&#xE769;" FontSize="18" Grid.Column="2"
+                                          Visibility="{Binding IsSuspended, Converter={StaticResource BooleanToNegativeVisibilityConverter}}"/>
+
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <Grid Margin="0,10,0,10" HorizontalAlignment="Stretch">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <!-- Text takes available space -->
@@ -127,7 +199,7 @@
                     <!-- Label Text -->
                     <TextBlock
                     Grid.Column="0"
-                    Text="Suspend game in focus before sleeping"
+                    Text="Suspend before sleep"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Left"
                     FontSize="18"
@@ -144,11 +216,43 @@
                         HorizontalAlignment="Right"
                         IsOn="{Binding AutoSuspendEnabled, Mode=OneWay}"
                         Toggled="AutoSuspedToggle_Toggled"
-                        XYFocusUp="{x:Bind SuspendButton}"
-                        XYFocusDown="{x:Bind PowerButtonActionComboBox}" />
+                        XYFocusUp="{x:Bind GameListListView}"
+                        XYFocusDown="{x:Bind AutoSuspendFocusToggle}"/>
                 </Grid>
 
-                <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="8" Padding="10" Margin="0,15,0,15">
+                <Grid Margin="0,10,0,10" HorizontalAlignment="Stretch">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <!-- Text takes available space -->
+                        <ColumnDefinition Width="Auto" />
+                        <!-- Toggle only as wide as needed -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Label Text -->
+                    <TextBlock
+                    Grid.Column="0"
+                    Text="Suspend on focus change"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
+                    FontSize="18"
+                    FontWeight="Bold"
+                    TextWrapping="WrapWholeWords"
+                    Margin="0,0,16,0"/>
+                    <!-- ToggleSwitch -->
+                    <ToggleSwitch
+                        x:Name="AutoSuspendFocusToggle"
+                        Grid.Column="1"
+                        OffContent="Off"
+                        OnContent="On"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Right"
+                        IsOn="{Binding AutoSuspendEnabled, Mode=OneWay}"
+                        Toggled="AutoSuspedToggle_Toggled"
+                        XYFocusUp="{x:Bind AutoSuspendToggle}"
+                        XYFocusDown="{x:Bind PowerButtonActionComboBox}"/>
+                </Grid>
+                
+                <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="8" Padding="10" Margin="0,25,0,15">
                 <!-- Power Button Action -->
                     <StackPanel>
                         <StackPanel Orientation="Vertical" Spacing="4" Margin="0,10,0,20">
@@ -163,7 +267,7 @@
                               Height="40"
                               Margin="5,0,5,0"
                               SelectedValuePath="Tag"
-                              XYFocusUp="{x:Bind AutoSuspendToggle}"
+                              XYFocusUp="{x:Bind AutoSuspendFocusToggle}"
                               XYFocusDown="{x:Bind EnhancedSleepToggle}">
                                 <ComboBoxItem Content="Do nothing">
                                     <ComboBoxItem.Tag>

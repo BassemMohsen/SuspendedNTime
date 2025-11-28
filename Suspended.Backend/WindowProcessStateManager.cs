@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Gaming.Preview.GamesEnumeration;
 
 namespace Suspended.Backend
 {
@@ -28,6 +29,8 @@ namespace Suspended.Backend
         private IntPtr lastForeground = IntPtr.Zero;
 
         private readonly Timer refreshTimer;
+        private TimeSpan refreshRate;
+        private bool refreshEnabled = true;
 
         // ================================
         // Win32 API
@@ -54,6 +57,21 @@ namespace Suspended.Backend
 
         private const int DWMWA_CLOAKED = 14;
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool QueryFullProcessImageName(
+                IntPtr hProcess,
+                int dwFlags,
+                StringBuilder lpExeName,
+                ref int lpdwSize);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool CloseHandle(IntPtr hObject);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr OpenProcess(uint processAccess, bool bInheritHandle,int processId);
+
+        private const int QueryLimitedInformation = 0x00001000;
+
         // ================================
         // Whitelisted processes that should never be suspended
         // ================================
@@ -78,7 +96,8 @@ namespace Suspended.Backend
             "Code",
             "Discord",
             "NVIDIA Overlay",
-            "Notepad"
+            "Notepad",
+            "XboxPcApp"
         };
 
         // ================================
@@ -86,13 +105,44 @@ namespace Suspended.Backend
         // ================================
         public WindowProcessManager(TimeSpan refreshRate)
         {
-            refreshTimer = new Timer(_ => RefreshState(), null, TimeSpan.Zero, refreshRate);
+            this.refreshRate = refreshRate;
+            refreshTimer = new Timer(
+            _ => { if (refreshEnabled) RefreshState(); },
+            null,
+            TimeSpan.Zero,
+            refreshRate);
         }
 
         // ================================
         // Public Data Accessors
         // ================================
         public IReadOnlyCollection<WindowInfo> Windows => windows.Values.ToList();
+
+        // ================================
+        // PUBLIC REFRESH CONTROL API
+        // ================================
+        public void StartRefresh()
+        {
+            refreshEnabled = true;
+            refreshTimer.Change(TimeSpan.Zero, refreshRate);
+        }
+
+        public void StopRefresh()
+        {
+            refreshEnabled = false;
+            refreshTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+        }
+
+        public void SetRefreshRate(TimeSpan newRate)
+        {
+            refreshRate = newRate;
+
+            if (refreshEnabled)
+                refreshTimer.Change(TimeSpan.Zero, newRate);
+        }
+
+        public TimeSpan GetRefreshRate() => refreshRate;
+        public bool IsRefreshing => refreshEnabled;
 
         // ================================
         // Refresh Logic
@@ -104,11 +154,6 @@ namespace Suspended.Backend
                 RefreshWindows();
                 RefreshForeground();
                 RefreshProcessState();
-
-                foreach (var w in windows.Values)
-                {
-                    Console.WriteLine($"[WINDOW] PID={w.ProcessId}, Hwnd={w.Handle}, Name='{w.ProcessName}' , Title='{w.Title}', IsSuspended='{w.IsSuspended}' ");
-                }
             }
             catch { /* swallow errors; no crashes */ }
         }
@@ -141,8 +186,8 @@ namespace Suspended.Backend
             if (!IsWindowVisible(hWnd))
                 return true; // skip
 
-            if (IsCloaked(hWnd))
-                return true; // skip cloaked/UWP windows
+            //if (IsCloaked(hWnd))
+            //    return true; // skip cloaked/UWP windows
 
             current.Add(hWnd);
 
@@ -177,18 +222,25 @@ namespace Suspended.Backend
 
             if (!windows.ContainsKey(hWnd))
             {
-                var info = new WindowInfo
-                {
-                    Handle = hWnd,
-                    ProcessId = (int)pid,
-                    Title = titleSb.ToString(),
-                    ProcessName = processName
+                    var size = 1024;
+                    var iconSb = new StringBuilder(size);
+                    var handle = OpenProcess(QueryLimitedInformation, false, (int)pid);
+                    var success = QueryFullProcessImageName(handle, 0, iconSb, ref size);
+                    CloseHandle(handle);
+
+                    var info = new WindowInfo
+                    {
+                        Handle = hWnd,
+                        ProcessId = (int)pid,
+                        Title = titleSb.ToString(),
+                        ProcessName = processName,
+                        ProcessIconPath = iconSb.ToString()
                     };
 
-                    windows[hWnd] = info;
+                        windows[hWnd] = info;
 
-                    OnWindowAppeared?.Invoke(info);
-                }
+                        OnWindowAppeared?.Invoke(info);
+                    }
 
                 return true;
             }, IntPtr.Zero);
@@ -246,6 +298,7 @@ namespace Suspended.Backend
             {
                 var process = Process.GetProcessById(pid);
 
+                // If first thread is suspended, we consider the process suspended
                 if (process.Threads.Count > 0)
                 {
                     var t = process.Threads[0];
@@ -254,6 +307,7 @@ namespace Suspended.Backend
                 }
 
                 /*
+                // Sccan all threads for suspended state
                 foreach (ProcessThread thread in process.Threads)
                 {
                     if (thread.ThreadState == System.Diagnostics.ThreadState.Wait &&
@@ -266,7 +320,20 @@ namespace Suspended.Backend
             catch { }
             return false;
         }
+
+
+        public List<GameInfo> GetGamesList()
+        {
+            return windows.Values.Select(w => new GameInfo
+            {
+                ProcessId = w.ProcessId,
+                Title = w.Title,
+                ProcessIconPath = w.ProcessIconPath,
+                IsSuspended = w.IsSuspended
+            }).ToList();
+        }
     }
+
 
     // ================================
     //  Supporting Data Types
@@ -277,7 +344,18 @@ namespace Suspended.Backend
         public int ProcessId { get; set; }
         public string Title { get; set; } = "";
         public string ProcessName { get; set; } = "";
+        public string ProcessIconPath { get; set; } = "";
         public bool IsSuspended { get; set; }
-        public override string ToString() => $"{ProcessId} | {Handle} | {Title} | {ProcessName}";
+    }
+
+    public struct GameInfo
+    {
+        public GameInfo()
+        {
+        }
+        public int ProcessId { get; set; }
+        public string Title { get; set; } = "";
+        public string ProcessIconPath { get; set; } = "";
+        public bool IsSuspended { get; set; }
     }
 }

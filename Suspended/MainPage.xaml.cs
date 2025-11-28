@@ -1,12 +1,15 @@
 ﻿using Microsoft.Gaming.XboxGameBar;
+using SharpDX.Direct3D9;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Security.Cryptography;
 using System.ServiceModel.Channels;
 using System.Text.Json;
 using System.Windows.Input;
@@ -65,6 +68,7 @@ namespace Suspended
             Backend.Instance.Send("get-go-back-to-sleep");
             Backend.Instance.Send("get-power-button-action");
             Backend.Instance.Send("get-enhanced-sleep");
+            Backend.Instance.Send("get-game-list");
             Backend.Instance.Send("init");
         }
 
@@ -116,6 +120,29 @@ namespace Suspended
                     _model.PowerButtonAction = int.Parse(args[1]);
                     PowerButtonActionComboBox.SelectedValue = _model.PowerButtonAction;
                     break;
+                case "game-list":
+                    Trace.WriteLine($"[MainPage.xaml.cs] Updating GameList");
+                    
+                    args = message.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                    if (args.Length < 2)
+                    {
+                        Trace.WriteLine("Malformed message: missing JSON payload");
+                        break;
+                    }
+                    //Trace.WriteLine("Raw payload: " + args[1]);
+                    
+                    try
+                    {
+                        if (args.Length < 2)
+                            return;
+                        var games = System.Text.Json.JsonSerializer.Deserialize<List<GameInfo>>(args[1]);
+                        _model.GamesList = new ObservableCollection<GameInfo>(games);
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine($"Failed to parse Games List: {ex.Message}");
+                    }
+                    break;
                 case "enhanced-sleep":
                     Trace.WriteLine($"[MainPage.xaml.cs] Updating UI Enhanced Sleep {args[1]}");
                     _model.EnhancedSleepEnabled = Convert.ToBoolean(int.Parse(args[1]));
@@ -163,6 +190,22 @@ namespace Suspended
             if (sender is ToggleSwitch toggleSwitch)
             {
                 _model.SetAutoSuspendEnabledVar(toggleSwitch.IsOn);
+            }
+        }
+
+        private async void GamesListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is GameInfo game)
+            {
+                if (game.IsSuspended)
+                {
+                    Backend.Instance.Send($"resume-game { Convert.ToInt32(game.ProcessId)}");
+                }
+                else
+                {
+                    Backend.Instance.Send($"suspend-game {Convert.ToInt32(game.ProcessId)}");
+                }
+
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -9,6 +10,17 @@ using Windows.UI.Core;
 
 namespace Suspended
 {
+    public struct GameInfo
+    {
+        public GameInfo()
+        {
+        }
+        public int ProcessId { get; set; }
+        public string Title { get; set; } = "";
+        public string ProcessIconPath { get; set; } = "";
+        public bool IsSuspended { get; set; }
+    }
+
     internal class MainPageModelWrapper : INotifyPropertyChanged, IDisposable
 	{
 		private MainPageModel _base;
@@ -22,6 +34,21 @@ namespace Suspended
 			_dispatcher = dispatcher;
 		}
 
+        public ObservableCollection<GameInfo> GamesList
+        {
+            get { lock (_base) { return _base.gamesList; } }
+            set
+            {
+                lock (_base)
+                {
+                    if (_base.gamesList != value)
+                    {
+                        _base.gamesList = value;
+                        _base.Notify("GamesList");
+                    }
+                }
+            }
+        }
 
         public bool AutoStart
         {
@@ -207,6 +234,7 @@ namespace Suspended
         public bool goBackToSleepEnabled = false;
         public double powerButtonAction = 2; // 0: Sleep, 1: Hibernate
         public bool enhancedSleepEnabled = false;
+        public ObservableCollection<GameInfo> gamesList;
 
         private List<MainPageModelWrapper> _wrappers = new List<MainPageModelWrapper>();
 

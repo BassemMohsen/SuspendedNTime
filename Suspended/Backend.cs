@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDX.Direct3D9;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -51,6 +52,14 @@ namespace Suspended
         {
             ApplicationData.Current.LocalSettings.Values["PackageSid"] = WebAuthenticationBroker.GetCurrentApplicationCallbackUri().Host.ToUpper();
             await FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
+        }
+
+        public static async Task NotifyRefreshList(bool isRefreshListEnabled)
+        {
+            if(isRefreshListEnabled) { 
+                Backend.Instance.Send("get-game-list");
+            }
+            Backend.Instance.Send($"set-refresh-list {Convert.ToInt32(isRefreshListEnabled)}");
         }
 
         private void Loop()

@@ -99,7 +99,7 @@ namespace Suspended
 
             // Ensure backend is running
             if (!Backend.Instance.IsConnected)
-                _ = Backend.LaunchBackend();
+                Backend.LaunchBackend();
 
             // Hook visibility and close events
             _xboxGameBarWidget.VisibleChanged += XboxGameBarWidget_VisibleChanged;
@@ -118,11 +118,24 @@ namespace Suspended
 
         private void XboxGameBarWidget_VisibleChanged(XboxGameBarWidget sender, object e)
         {
-            Trace.WriteLine($"[App.xaml.cs] XboxGameBarWidget_VisibleChanged");
             if (sender.Visible) // Only launch backend when it is visible and Backend is nsot r
             {
-                if (!Backend.Instance.IsConnected)
-                    _ = Backend.LaunchBackend();
+                if (!Backend.Instance.IsConnected) {
+                    Backend.LaunchBackend();
+                }
+                Trace.WriteLine($"[App.xaml.cs] set-refresh-list {sender.Visible}");
+                if (Backend.Instance.IsConnected)
+                {
+                    Backend.NotifyRefreshList(true);
+                }
+            }
+            else
+            {
+                Trace.WriteLine($"[App.xaml.cs] set-refresh-list {sender.Visible}");
+                if (Backend.Instance.IsConnected)
+                {
+                    Backend.NotifyRefreshList(false);
+                }
             }
         }
 

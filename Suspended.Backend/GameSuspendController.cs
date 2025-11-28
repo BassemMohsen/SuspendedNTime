@@ -70,6 +70,14 @@ namespace Suspended.Backend
         [DllImport("user32.dll")]
         private static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
 
+        [DllImport("user32.dll")]
+        private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+        private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        private static extern bool IsWindowVisible(IntPtr hWnd);
+
         // Whitelisted processes that should never be suspended
         private static readonly string[] WhitelistedProcesses =
         {
@@ -87,6 +95,24 @@ namespace Suspended.Backend
             "Suspended",
             "WindowsTerminal",
         };
+
+        public static IntPtr GetMainWindowHandle(int pid)
+        {
+            IntPtr hwnd = IntPtr.Zero;
+
+            EnumWindows((h, l) =>
+            {
+                GetWindowThreadProcessId(h, out uint windowPid);
+                if (windowPid == pid && IsWindowVisible(h))
+                {
+                    hwnd = h;
+                    return false; // stop enumerating
+                }
+                return true; // continue
+            }, IntPtr.Zero);
+
+            return hwnd;
+        }
 
         public static bool IsProcessSuspended(Process process)
         {
@@ -158,6 +184,45 @@ namespace Suspended.Backend
                 Console.WriteLine($"[GameSuspendController] Failed to suspend process: {ex.Message}");
             }
         }
+        public static async Task SuspendApp(int processId)
+        {
+            try
+            {
+                IntPtr hwnd = GetMainWindowHandle(processId);
+                if (hwnd == IntPtr.Zero)
+                {
+                    Console.WriteLine("[GameSuspendController] SuspendApp couldn't get Window handle.");
+                    return;
+                }
+                using (var process = Process.GetProcessById(processId))
+                {
+                    if (IsWhitelisted(process.ProcessName))
+                    {
+                        Console.WriteLine($"[GameSuspendController] Skipping whitelisted process: {process.ProcessName}");
+                        return;
+                    }
+
+                    if (IsProcessSuspended(process))
+                    {
+                        Console.WriteLine($"[GameSuspendController] Process already suspended: {process.ProcessName}");
+                        return;
+                    }
+
+                    // Minimize the window first to avoid issues with certain games
+                    ShowWindowAsync(hwnd, SW_FORCEMINIMIZE);
+
+                    // 500 ms delay (async, does NOT block the caller)
+                    await Task.Delay(500);
+
+                    Console.WriteLine($"[GameSuspendController] Minimized and Suspending process: {process.ProcessName} ({processId})");
+                    SuspendProcessTree(processId);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GameSuspendController] Failed to suspend process: {ex.Message}");
+            }
+        }
 
         public static async Task ResumeForegroundApp()
         {
@@ -182,6 +247,37 @@ namespace Suspended.Backend
 
                     Console.WriteLine($"[GameSuspendController] Resuming process: {process.ProcessName} ({processId})");
                     ResumeProcessTree(process.Id);
+
+                    // After resuming, restore the window
+                    ShowWindowAsync(hwnd, SW_RESTORE);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GameSuspendController] Failed to resume process: {ex.Message}");
+            }
+        }
+
+        public static async Task ResumeApp(int processId)
+        {
+            try
+            {
+                IntPtr hwnd = GetMainWindowHandle(processId);
+                if (hwnd == IntPtr.Zero)
+                {
+                    Console.WriteLine("[GameSuspendController] ResumeApp couldn't get Window handle.");
+                    return;
+                }
+                using (var process = Process.GetProcessById(processId))
+                {
+                    if (IsWhitelisted(process.ProcessName))
+                    {
+                        Console.WriteLine($"[GameSuspendController] Skipping whitelisted process: {process.ProcessName}");
+                        return;
+                    }
+
+                    Console.WriteLine($"[GameSuspendController] Resuming process: {process.ProcessName} ({processId})");
+                    ResumeProcessTree(processId);
 
                     // After resuming, restore the window
                     ShowWindowAsync(hwnd, SW_RESTORE);

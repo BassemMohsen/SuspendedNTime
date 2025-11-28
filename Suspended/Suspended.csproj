@@ -53,6 +53,10 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Backend.cs" />
+    <Compile Include="BooleanToNegativeVisibilityConverter.cs" />
+    <Compile Include="ColorToSuspendedStateConverter.cs" />
+    <Compile Include="BooleanToSuspendedStateConverter.cs" />
+    <Compile Include="IconConverter.cs" />
     <Compile Include="BooleanToVisibilityConverter.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
@@ -113,7 +117,9 @@
   <ItemGroup>
     <Compile Include="MainPage.Model.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
