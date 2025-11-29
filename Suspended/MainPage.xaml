@@ -37,9 +37,9 @@
         <CornerRadius x:Key="ControlCornerRadius">8,8,8,8</CornerRadius>
         <Thickness x:Key="ButtonPadding">15,10,15,11</Thickness>
         <local:BooleanToVisibilityConverter  x:Key="BooleanToVisibilityConverter"/>
-        <local:ExePathToIconConverter  x:Key="ExePathToIconConverter"/>
         <local:BooleanToSuspendedStateConverter  x:Key="BooleanToSuspendedStateConverter"/>
         <local:BooleanToNegativeVisibilityConverter x:Key="BooleanToNegativeVisibilityConverter"/>
+        <local:SuspendedToIconConverter x:Key="SuspendedToIconConverter"/>
         <local:ColorToSuspendedStateConverter  x:Key="ColorToSuspendedStateConverter"
                                                SuspendedBrush="{StaticResource SuspendedColorBrush}"
                                                RunningBrush="{StaticResource RunningColorBrush}"/>
@@ -163,10 +163,8 @@
                                     <!-- 2: FontIcon(s) -->
                                 </Grid.ColumnDefinitions>
                                 <!-- Process Icon -->
-                                <!-- Source="{Binding IconPath, Converter={StaticResource ExePathToIconConverter}}" -->
-                                <!-- Source="ms-appx:///Assets//info.png" -->
                                 <Image Width="64" Height="64" Grid.Column="0"
-                                       Source="{Binding IconPath}"
+                                       Source="{Binding IconPathForUI}"
                                        HorizontalAlignment="Left">
                                 </Image>
 

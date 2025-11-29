@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Windows.UI.Core;
 
@@ -19,6 +20,11 @@ namespace Suspended
         public string Title { get; set; } = "";
         public string IconPath { get; set; } = "";
         public bool IsSuspended { get; set; }
+
+        [JsonIgnore]   // <-- prevents serialization/deserialization
+        public string IconPathForUI => IsSuspended ?
+                                        IconPath.Replace(".png", "-grayscale.png")
+                                        : IconPath;
     }
 
     internal class MainPageModelWrapper : INotifyPropertyChanged, IDisposable

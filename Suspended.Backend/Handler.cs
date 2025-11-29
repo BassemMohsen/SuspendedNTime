@@ -43,6 +43,7 @@ namespace Suspended.Backend
             GameProcessManager.OnForegroundChanged += ForegroundGameWindowChanged;
             GameProcessManager.OnProcessSuspended += GameProcessSuspended;
             GameProcessManager.OnProcessResumed += GameProcessResumed;
+            GameProcessManager.StartRefresh();
         }
 
         public void Register(Communication comm)
@@ -220,7 +221,9 @@ namespace Suspended.Backend
                             }
                             else
                             {
-                                GameProcessManager.StopRefresh();
+                                // refresh slower
+                                GameProcessManager.SetRefreshRate(TimeSpan.FromMilliseconds(3000));
+                                GameProcessManager.StartRefresh();
                                 Console.WriteLine($"[Server Handler] Stopped Game List Refresh");
                             }
                         }

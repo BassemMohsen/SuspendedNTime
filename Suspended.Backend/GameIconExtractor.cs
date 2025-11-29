@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using Windows.UI.Xaml;
 
 namespace Suspended.GameIconExtractor
 {
@@ -32,6 +34,7 @@ namespace Suspended.GameIconExtractor
         SIIGBF_ICONONLY = 0x04,
         SIIGBF_THUMBNAILONLY = 0x08,
         SIIGBF_INCACHEONLY = 0x10,
+        SIIGBF_ICONBACKGROUND = 0x00000080
     }
 
     [ComImport]
@@ -54,23 +57,85 @@ namespace Suspended.GameIconExtractor
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool DeleteObject(IntPtr hObject);
 
-        public static Bitmap GetExeIcon(string exePath, int size)
+        public static Bitmap GetExeIcon(string exePath, int size, int cornerRadius = 6)
         {
-            Guid shellItemGuid = new Guid("43826d1e-e718-42ee-bc55-a1e261c37bfe");
+            try
+            {
+                // Create the shell item
+                Guid shellItemGuid = new Guid("43826d1e-e718-42ee-bc55-a1e261c37bfe");
+                SHCreateItemFromParsingName(exePath, IntPtr.Zero, shellItemGuid, out IShellItem shellItem);
 
-            SHCreateItemFromParsingName(exePath, IntPtr.Zero, shellItemGuid, out IShellItem shellItem);
+                var factory = (IShellItemImageFactory)shellItem;
 
-            var factory = (IShellItemImageFactory)shellItem;
+                SIZE sz = new SIZE { cx = size, cy = size };
 
-            SIZE sz = new SIZE { cx = size, cy = size };
+                // Request the icon with the specified size
+                factory.GetImage(sz, SIIGBF.SIIGBF_BIGGERSIZEOK | SIIGBF.SIIGBF_ICONONLY, out IntPtr hBitmap);
+                if (hBitmap == IntPtr.Zero)
+                    return null;
 
-            factory.GetImage(sz, SIIGBF.SIIGBF_BIGGERSIZEOK, out IntPtr hBitmap);
+                var icon = Icon.FromHandle(hBitmap);
 
-            Bitmap bmp = Bitmap.FromHbitmap(hBitmap);
+                // Apply rounded corners if needed
+                using (var temp = Bitmap.FromHbitmap(hBitmap))
+                {
+                    var bmp = new Bitmap(size, size, PixelFormat.Format32bppArgb);
 
-            DeleteObject(hBitmap);
+                    using (Graphics g = Graphics.FromImage(bmp))
+                    {
+                        g.Clear(Color.Transparent);
 
-            return bmp;
+                        using (var path = new System.Drawing.Drawing2D.GraphicsPath())
+                        {
+                            path.AddArc(0, 0, cornerRadius * 2, cornerRadius * 2, 180, 90);
+                            path.AddArc(bmp.Width - cornerRadius * 2, 0, cornerRadius * 2, cornerRadius * 2, 270, 90);
+                            path.AddArc(bmp.Width - cornerRadius * 2, bmp.Height - cornerRadius * 2, cornerRadius * 2, cornerRadius * 2, 0, 90);
+                            path.AddArc(0, bmp.Height - cornerRadius * 2, cornerRadius * 2, cornerRadius * 2, 90, 90);
+                            path.CloseFigure();
+
+                            g.SetClip(path);
+                            g.DrawImage(temp, 0, 0, bmp.Width, bmp.Height);
+                        }
+                    }
+
+                    DeleteObject(hBitmap);
+                    return bmp;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Converts a color Bitmap to grayscale
+        /// </summary>
+        public static Bitmap MakeGrayscale(Bitmap original)
+        {
+            Bitmap grayBmp = new Bitmap(original.Width, original.Height);
+
+            using (Graphics g = Graphics.FromImage(grayBmp))
+            {
+                // Create grayscale color matrix
+                var colorMatrix = new System.Drawing.Imaging.ColorMatrix(
+                    new float[][]
+                    {
+                new float[] {0.299f, 0.299f, 0.299f, 0, 0},
+                new float[] {0.587f, 0.587f, 0.587f, 0, 0},
+                new float[] {0.114f, 0.114f, 0.114f, 0, 0},
+                new float[] {0, 0, 0, 1, 0},
+                new float[] {0, 0, 0, 0, 1}
+                    });
+
+                var attributes = new ImageAttributes();
+                attributes.SetColorMatrix(colorMatrix);
+
+                g.DrawImage(original, new Rectangle(0, 0, original.Width, original.Height),
+                    0, 0, original.Width, original.Height, GraphicsUnit.Pixel, attributes);
+            }
+
+            return grayBmp;
         }
     }
 }

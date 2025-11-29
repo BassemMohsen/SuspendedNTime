@@ -349,8 +349,16 @@ namespace Suspended.Backend
 
             if (!File.Exists(cachePath))
             {
-                using Bitmap bmp = GameIconExtractor.IconHelper.GetExeIcon(fullExePath, 64);
+                using Bitmap bmp = GameIconExtractor.IconHelper.GetExeIcon(fullExePath, 64, 6);
                 bmp.Save(cachePath, ImageFormat.Png);
+
+                string grayCachePath = Path.Combine(localState, exeName + "-grayscale.png");
+                if (!File.Exists(grayCachePath))
+                {
+                    using Bitmap grayBmp = GameIconExtractor.IconHelper.MakeGrayscale(bmp);
+                    grayBmp.Save(grayCachePath, ImageFormat.Png);
+                }
+
             }
         }
     }
