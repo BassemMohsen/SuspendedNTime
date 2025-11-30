@@ -19,6 +19,8 @@ namespace Suspended.Backend
         private ModernStandbyMonitor modernStandbymonitor;
         private Communication _communication;
         private WindowProcessManager GameProcessManager;
+        private readonly object gameListLock = new();
+
         private List<GameInfo> gameList;
 
         public enum ScalingModeMethod : int
@@ -198,9 +200,14 @@ namespace Suspended.Backend
                 case "get-game-list":
                     {
                         Console.WriteLine($"[Server Handler] Get Games List");
-                        gameList = GameProcessManager.GetGamesList();
+                        string json;
+                        lock (gameListLock)
+                        {
+                            gameList = GameProcessManager.GetGamesList();
+                            Console.WriteLine($"[Server Handler] Created the following list {gameList.ToString()}");
 
-                        string json = System.Text.Json.JsonSerializer.Serialize(gameList);
+                            json = System.Text.Json.JsonSerializer.Serialize(gameList);
+                        }
 
                         Console.WriteLine($"[Server Handler] Replying with the following List {json}");
 
@@ -249,9 +256,12 @@ namespace Suspended.Backend
             // Serialize to JSON string
             if (_communication != null)
             {
-                gameList = GameProcessManager.GetGamesList();
-
-                string json = System.Text.Json.JsonSerializer.Serialize(gameList);
+                string json;
+                lock (gameListLock)
+                {
+                    gameList = GameProcessManager.GetGamesList();
+                    json = System.Text.Json.JsonSerializer.Serialize(gameList);
+                }
 
                 _communication.Send("game-list " + json);
             }
@@ -263,9 +273,12 @@ namespace Suspended.Backend
             // Serialize to JSON string
             if (_communication != null)
             {
-                gameList = GameProcessManager.GetGamesList();
-
-                string json = System.Text.Json.JsonSerializer.Serialize(gameList);
+                string json;
+                lock (gameListLock)
+                {
+                    gameList = GameProcessManager.GetGamesList();
+                    json = System.Text.Json.JsonSerializer.Serialize(gameList);
+                }
 
                 _communication.Send("game-list " + json);
             }
@@ -282,9 +295,12 @@ namespace Suspended.Backend
             // Serialize to JSON string
             if (_communication != null)
             {
-                gameList = GameProcessManager.GetGamesList();
-
-                string json = System.Text.Json.JsonSerializer.Serialize(gameList);
+                string json;
+                lock (gameListLock)
+                {
+                    gameList = GameProcessManager.GetGamesList();
+                    json = System.Text.Json.JsonSerializer.Serialize(gameList);
+                }
 
                 _communication.Send("game-list " + json);
             }
@@ -296,9 +312,12 @@ namespace Suspended.Backend
             // Serialize to JSON string
             if (_communication != null)
             {
-                gameList = GameProcessManager.GetGamesList();
-
-                string json = System.Text.Json.JsonSerializer.Serialize(gameList);
+                string json;
+                lock (gameListLock)
+                {
+                    gameList = GameProcessManager.GetGamesList();
+                    json = System.Text.Json.JsonSerializer.Serialize(gameList);
+                }
 
                 _communication.Send("game-list " + json);
             }

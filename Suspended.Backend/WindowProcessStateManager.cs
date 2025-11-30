@@ -29,6 +29,7 @@ namespace Suspended.Backend
         // ================================
         // Internal tracking
         // ================================
+        private readonly object windowsLock = new();
         private readonly Dictionary<IntPtr, WindowInfo> windows = new();
         private IntPtr lastForeground = IntPtr.Zero;
 
@@ -256,9 +257,10 @@ namespace Suspended.Backend
                         ProcessExePath = iconSb.ToString(),
                         ProcessIconPath = msAppDataUri
                     };
-
-                    windows[hWnd] = info;
-
+                    lock (windowsLock)
+                    {
+                        windows[hWnd] = info;
+                    }
                     OnWindowAppeared?.Invoke(info);
                 }
 
@@ -269,9 +271,12 @@ namespace Suspended.Backend
             var closed = windows.Keys.Where(h => !current.Contains(h)).ToList();
             foreach (var hwnd in closed)
             {
-                var info = windows[hwnd];
-                windows.Remove(hwnd);
-                OnWindowClosed?.Invoke(info);
+                lock (windowsLock)
+                {
+                    var info = windows[hwnd];
+                    windows.Remove(hwnd);
+                    OnWindowClosed?.Invoke(info);
+                }
             }
         }
 
@@ -284,9 +289,11 @@ namespace Suspended.Backend
             if (fg != lastForeground)
             {
                 lastForeground = fg;
-
-                if (windows.TryGetValue(fg, out var info))
-                    OnForegroundChanged?.Invoke(info);
+                lock (windowsLock)
+                {
+                    if (windows.TryGetValue(fg, out var info))
+                        OnForegroundChanged?.Invoke(info);
+                }
             }
         }
 
@@ -333,13 +340,16 @@ namespace Suspended.Backend
 
         public List<GameInfo> GetGamesList()
         {
-            return windows.Values.Select(w => new GameInfo
+            lock (windowsLock)
             {
-                ProcessId = w.ProcessId,
-                Title = w.Title,
-                IconPath = w.ProcessIconPath,
-                IsSuspended = w.IsSuspended
-            }).ToList();
+                return windows.Values.Select(w => new GameInfo
+                {
+                    ProcessId = w.ProcessId,
+                    Title = w.Title,
+                    IconPath = w.ProcessIconPath,
+                    IsSuspended = w.IsSuspended
+                }).ToList();
+            }
         }
 
         private void TriggerIconBuild(string fullExePath, string exeName)

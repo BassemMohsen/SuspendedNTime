@@ -39,11 +39,14 @@
         <local:BooleanToVisibilityConverter  x:Key="BooleanToVisibilityConverter"/>
         <local:BooleanToSuspendedStateConverter  x:Key="BooleanToSuspendedStateConverter"/>
         <local:BooleanToNegativeVisibilityConverter x:Key="BooleanToNegativeVisibilityConverter"/>
-        <local:SuspendedToIconConverter x:Key="SuspendedToIconConverter"/>
+        <local:BoolToOpacityConverter  x:Key="BoolToOpacityConverter "/>
         <local:ColorToSuspendedStateConverter  x:Key="ColorToSuspendedStateConverter"
                                                SuspendedBrush="{StaticResource SuspendedColorBrush}"
                                                RunningBrush="{StaticResource RunningColorBrush}"/>
-
+        <local:BoolToOpacityConverter x:Key="BoolToOpacityConverter"
+                                  TrueOpacity="1.0"
+                                  FalseOpacity="0.35"/>
+        
         <Style x:Key="RoundedListViewItemStyle" TargetType="ListViewItem">
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -165,7 +168,8 @@
                                 <!-- Process Icon -->
                                 <Image Width="64" Height="64" Grid.Column="0"
                                        Source="{Binding IconPathForUI}"
-                                       HorizontalAlignment="Left">
+                                       HorizontalAlignment="Left"
+                                       Opacity="{Binding IsSuspended, Converter={StaticResource BoolToOpacityConverter}}">
                                 </Image>
 
 
@@ -218,7 +222,6 @@
                         HorizontalAlignment="Right"
                         IsOn="{Binding AutoSuspendEnabled, Mode=OneWay}"
                         Toggled="AutoSuspedToggle_Toggled"
-                        XYFocusUp="{x:Bind GameListListView}"
                         XYFocusDown="{x:Bind AutoSuspendFocusToggle}"/>
                 </Grid>
 

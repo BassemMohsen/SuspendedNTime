@@ -23,8 +23,18 @@ namespace Suspended
 
         [JsonIgnore]   // <-- prevents serialization/deserialization
         public string IconPathForUI => IsSuspended ?
-                                        IconPath.Replace(".png", "-grayscale.png")
+                                        InsertSuffixBeforeExtension(IconPath, "-grayscale")
                                         : IconPath;
+        private static string InsertSuffixBeforeExtension(string path, string suffix)
+        {
+            if (string.IsNullOrEmpty(path))
+                return path;
+
+            int dot = path.LastIndexOf('.');
+            if (dot < 0) return path + suffix;
+
+            return path.Substring(0, dot) + suffix + path.Substring(dot);
+        }
     }
 
     internal class MainPageModelWrapper : INotifyPropertyChanged, IDisposable

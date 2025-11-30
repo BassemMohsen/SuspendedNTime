@@ -70,7 +70,7 @@ namespace Suspended.GameIconExtractor
                 SIZE sz = new SIZE { cx = size, cy = size };
 
                 // Request the icon with the specified size
-                factory.GetImage(sz, SIIGBF.SIIGBF_BIGGERSIZEOK | SIIGBF.SIIGBF_ICONONLY, out IntPtr hBitmap);
+                factory.GetImage(sz, SIIGBF.SIIGBF_RESIZETOFIT |SIIGBF.SIIGBF_BIGGERSIZEOK | SIIGBF.SIIGBF_ICONONLY, out IntPtr hBitmap);
                 if (hBitmap == IntPtr.Zero)
                     return null;
 
@@ -84,6 +84,10 @@ namespace Suspended.GameIconExtractor
                     using (Graphics g = Graphics.FromImage(bmp))
                     {
                         g.Clear(Color.Transparent);
+                        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                        g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                        g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
 
                         using (var path = new System.Drawing.Drawing2D.GraphicsPath())
                         {
