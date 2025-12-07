@@ -101,7 +101,10 @@ namespace Suspended.Backend
             "NVIDIA Overlay",
             "NVIDIA App",
             "Notepad",
-            "XboxPcApp"
+            "XboxPcApp",
+            "Gamebar_Widget",
+            "MSI Center M",
+            "IntelGraphicsSoftware"
         };
 
         public static IntPtr GetMainWindowHandle(int pid)
