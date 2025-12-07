@@ -5,10 +5,6 @@
 ![Build Status](https://img.shields.io/github/actions/workflow/status/BassemMohsen/SuspendedNTime/dotnet-desktop.yml?branch=main&style=for-the-badge&label=Build)
 ![GitHub Repo stars](https://img.shields.io/github/stars/BassemMohsen/SuspendedNTime?style=for-the-badge&color=yellow&label=Stars)
 
-<h1 align="center">
-  <img width="788" height="364" alt="Suspended N Time Banner" src="https://github.com/user-attachments/assets/2405791a-4a9e-4a29-8c4c-8528ac5782e1">
-</h1>
-
 ⚠️ Technology Preview
 Please report bugs or unexpected behavior [here](https://github.com/BassemMohsen/SuspendedNTime/issues)
 
@@ -68,8 +64,11 @@ Suspended N Time can apply an enhanced power profile optimized for Modern Standb
 
 ## Re-Sleep
 
-- Re-Sleep automatically returns the device to Modern Standby (S0ix) if it wakes unexpectedly.
-- If the system wakes without the user pressing the power button, it immediately re-enters S0ix.
+Re-Sleep acts as a safety net against Windows modern sleep random wakeups that can be triggerd by OEM BIOS, or by drivers from Silicon vendors.
+
+- Re-Sleep listens to Windows Kernel Power events for entering, exiting modern sleep, and the wakeup causes for exiting low power mode.
+- Re-Sleep automatically returns the device back to Modern Standby (S0ix) if it wakes unexpectedly.
+- If the system wakes without the user pressing the power button, it immediately returns back to low power S0ix.
 
 💡 If you use Hibernate, you do not need Re-Sleep — leave it disabled.
 
