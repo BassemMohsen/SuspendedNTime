@@ -1,23 +1,77 @@
-# <img src="https://github.com/user-attachments/assets/118f29e9-f890-4fa2-a8e2-7fb228d7f65e" width="50" height="50" alt="LockScreenLogo" style="vertical-align: middle; margin-right: 8px;" /> Tooth N Claw
+# <img src="https://github.com/user-attachments/assets/9c24a111-c538-4227-a83f-de10ff9cd0e2" width="50" height="50" alt="LockScreenLogo" style="vertical-align: middle; margin-right: 8px;" /> Suspended N Time
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/BassemMohsen/ToothNClaw?style=for-the-badge&color=blue)](https://github.com/BassemMohsen/ToothNClaw/releases/latest)
-[![GitHub all releases](https://img.shields.io/github/downloads/BassemMohsen/ToothNClaw/total?style=for-the-badge&color=green)](https://github.com/BassemMohsen/ToothNClaw/releases)
-![Build Status](https://img.shields.io/github/actions/workflow/status/BassemMohsen/ToothNClaw/dotnet-desktop.yml?branch=main&style=for-the-badge&label=Build)
-![GitHub Repo stars](https://img.shields.io/github/stars/BassemMohsen/ToothNClaw?style=for-the-badge&color=yellow&label=Stars)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/BassemMohsen/SuspendedNTime?style=for-the-badge&color=blue)](https://github.com/BassemMohsen/SuspendedNTime/releases/latest)
+[![GitHub all releases](https://img.shields.io/github/downloads/BassemMohsen/SuspendedNTime/total?style=for-the-badge&color=green)](https://github.com/BassemMohsen/SuspendedNTime/releases)
+![Build Status](https://img.shields.io/github/actions/workflow/status/BassemMohsen/SuspendedNTime/dotnet-desktop.yml?branch=main&style=for-the-badge&label=Build)
+![GitHub Repo stars](https://img.shields.io/github/stars/BassemMohsen/SuspendedNTime?style=for-the-badge&color=yellow&label=Stars)
 
 <h1 align="center">
   <img width="788" height="364" alt="Suspended N Time Banner" src="https://github.com/user-attachments/assets/2405791a-4a9e-4a29-8c4c-8528ac5782e1">
 </h1>
 
+⚠️ Technology Preview
+Please report bugs or unexpected behavior [here](https://github.com/BassemMohsen/SuspendedNTime/issues)
 
-**Suspended N Time Xbox Game Bar Widget** brings native, controller-friendly performance tuning directly into your gameplay experience.
-- On-the-fly tuning: Adjust APU power and graphics settings instantly from gamebar, mid-game, without interrupting your session.
-- Controller-first experience: Designed for handheld and couch gaming — no need to navigate desktop apps with tiny UI elements made for mouse and keyboard.
-- Filling Windows XBox Fullscreen Experience gaps letting gamers fine-tune system performance directly from the Xbox Game Bar — no more dropping to Desktop mode for simple APU changes.
-- Zero compute footprint: Uses no CPU or GPU compute and has no power impact.
+⚠️ Online Games
+Suspending competitive or online games may trigger anti-cheat systems or force a return to the lobby.
 
-<img width="1920" height="1200" alt="Screenshot 2025-10-21 190036" src="https://github.com/user-attachments/assets/3504fcf3-bb55-4cb2-82ef-72573bf96b13" />
+⚠️ Game Engine Behavior
+Many games are not designed to be frozen mid-execution. Unexpected behavior is possible.
 
+
+**Suspended N Time Xbox Game Bar Widget** is an Xbox Game Bar widget that allows you to pause and resume games — even titles that do not support pausing natively.
+It’s especially useful when you need to temporarily freeze a game or application to free CPU and GPU resources for another task, without closing anything.
+
+<img width="1920" height="1200" alt="Screenshot 2025-12-07 093456" src="https://github.com/user-attachments/assets/268c70af-a31d-42f2-b0fa-85bf88ae255c" />
+
+
+## How it works
+
+Suspended N Time uses low-level Windows kernel APIs:
+
+- NtSuspendProcess()
+- NtResumeProcess()
+
+These API calls freeze and unfreeze the game (and all its child processes) directly in memory.
+
+<img width="1920" height="536" alt="Screenshot 2025-12-07 093615" src="https://github.com/user-attachments/assets/6c962a86-71a7-40c8-85be-48a1080b1c71" />
+
+*When a game is suspended, its resources usage:**
+
+- CPU usage: 0%
+- GPU usage: 0%
+- RAM usage: unchanged
+
+If enough applications are suspended to exceed physical RAM, Windows will move their pages to disk — standard virtual memory behavior.
+
+*Suspend before Sleep:* Detects when going to low power (S0ix) mode and suspend foreground game process.
+Many gaming laptops/desktops keep games running in the background when entering S0ix/Modern Standby → wasting battery or causing heat.
+Automatically suspending prevents:
+- High idle power usage
+* GPU/CPU burn during sleep transitions
+Running the game when the user doesn’t intend to
+
+*Suspend on focus change:* Detects when user switches away from the game and suspend game process automatically.
+Many players want to alt-tab and stop CPU/GPU burn instantly.
+It also makes it easier switching to other games or back to the game launcher.
+
+## Enhanced Power Optimization
+
+Suspended N Time can apply an enhanced power profile optimized for Modern Standby (S0ix):
+
+- Disables wake timers
+- Enables disconnected standby (Wi-Fi and mobile radios off)
+- Maximizes PCI Express power savings
+- Allows CPU to idle down to 0%
+
+<img width="1920" height="1200" alt="Screenshot 2025-12-07 093719" src="https://github.com/user-attachments/assets/ea99e7b0-c2e6-4f93-8e34-bfbdd1deea20" />
+
+## Re-Sleep
+
+- Re-Sleep automatically returns the device to Modern Standby (S0ix) if it wakes unexpectedly.
+- If the system wakes without the user pressing the power button, it immediately re-enters S0ix.
+
+💡 If you use Hibernate, you do not need Re-Sleep — leave it disabled.
 
 
 # ☕ Support Me
@@ -37,28 +91,10 @@ Click the badge below open directly:
 </a>
 
 
-# Features list
-- **CPU Boost Toggle** – Enable or disable CPU Boost to reduce power consumption by up to 50%, freeing power headroom for the GPU.
-- **Frame Limiter** – Lock your frame rate for consistent performance and thermals. With VRR displays, optimal values are typically 48–116 FPS.
-- **Frame Sync Options** – Choose your preferred frame synchronization mode to balance latency and visual smoothness.
-- **Display Resolution Control** – Some Windows games and apps behave unpredictably when changing resolutions dynamically; this tool helps manage those scenarios cleanly.
-- **Endurance Gaming (Auto-TDP)** – Intel’s adaptive power management feature that automatically adjusts CPU/GPU power allocation to maintain a target frame rate while extending battery life.
-- **Xe Low Latency (XeLL)** – Reduces input latency by intelligently delaying frame presentation for improved responsiveness.
-- **Intel Graphics Software Launcher** – Provides quick access to the Intel Graphics Control Center, even when running in Xbox Game Bar full-screen mode.
-- **Hot Key function** using View button and X button marked in blue in the image [Only in Desktop mode, not XBox Fullscreen experience]
-- **Intel Adaptive Sharpening** Enhance details in blurred or upscaled content to make it crisper. 
-
-Note: This is designed to be lightweight and complement MSI Quick Settings options. This is not intended to replace MSI Quick Settings.
-
-# 🎥 Featured Demos, Showcases & Community Tutorials
-
-[![Watch the video](https://img.youtube.com/vi/emzgflgQCSM/hqdefault.jpg)](https://www.youtube.com/watch?v=emzgflgQCSM)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[![Watch the video](https://img.youtube.com/vi/HemCPLP78-k/hqdefault.jpg)](https://youtu.be/HemCPLP78-k?t=858)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[![Watch the video](https://img.youtube.com/vi/0SmKsFUwTJE/hqdefault.jpg)](https://youtu.be/0SmKsFUwTJE?t=423s)
-
-
 # Supported Devices
+It should be compatiable with any Windows PC. However, I have only tested on the following hardware:
 - MSI Claw 8 AI+ A2VM with Intel Lunar Lake.
-- MSI Claw 7 AI+ A2VM with Intel Lunar Lake.
-- Requires Intel Graphics Software and Intel Drivers for Lunar Lake APU.
+- Windows Desktop with AMD 7950X3D and Nvidia RTX GPU
 
 # Bugs & Features
 Found a bug and want it fixed? Have an idea for a new feature?
@@ -68,9 +104,38 @@ Please [open an issue](https://github.com/BassemMohsen/SuspendedNTime/issues) in
 - [Merrit/nyrna](https://github.com/Merrit/nyrna)
 - [chenx-dust/RyzenAdjUWP](https://github.com/chenx-dust/RyzenAdjUWP)
 
+I have also drawn some inspiration for use cases from:
+- XBox [Quick Resume](https://www.pcmag.com/how-to/how-to-switch-between-games-with-quick-resume-on-xbox-series-x-series-s)
+- Decky Load Steam Deck Plugin [Pause Game](https://github.com/popsUlfr/SDH-PauseGames)
 
-# Frequently Asked Questions
-## How to uninstall my Suspended N Time?
-Open Windows Settings -> Apps -> Installed Apps
-Uninstall Suspended N Time using the ... -> Uninstall
+# Limitations & Frequently Asked Questions
+
+❗ You cannot use Alt+Tab / Task Switcher to switch to a suspended game
+Suspended processes cannot respond to compositor signals.
+Because of this, Windows cannot complete the switch to a suspended window.
+To switch back:
+Resume the game from the Game Bar widget
+Then Alt+Tab will work normally
+
+❗ Windows may show “Not Responding – Wait or End Process?”
+This is expected.
+When suspended, a game cannot respond to system messages, so Windows assumes it is frozen.
+Simply resume the game — the dialog will disappear immediately.
+
+❗ System utilities or OEM tools may appear in the game list
+Examples:
+Armoury Crate
+Windows dialogue popups
+OEM overlays
+Internal Windows processes
+**Do not suspend these.**
+If a non-game appears, report the process name and it will be added to the ignore list.
+
+❗ Re-Sleep may not work reliably when games are suspended
+Windows broadcasts a “prepare for low-power mode” signal before entering sleep.
+Suspended games cannot respond with acknowledgment, which can prevent or delay automatic sleep.
+
+❗ Display may turn off after resuming a game
+If the PC wakes from sleep and you later resume a suspended game, the game may process a previously queued “low-power mode” signal.
+This can cause Windows to briefly re-enter display sleep.
    
