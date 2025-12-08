@@ -32,7 +32,7 @@ These API calls freeze and unfreeze the game (and all its child processes) direc
 
 <img width="1920" height="536" alt="Screenshot 2025-12-07 093615" src="https://github.com/user-attachments/assets/6c962a86-71a7-40c8-85be-48a1080b1c71" />
 
-*When a game is suspended, its resources usage:**
+*When a game is suspended, its resources usage:*
 
 - CPU usage: 0%
 - GPU usage: 0%
@@ -76,12 +76,12 @@ Re-Sleep acts as a safety net against Windows modern sleep random wakeups that c
 # ☕ Support Me
 If you like my work, you can buy me a coffee:   [![Donate via PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://paypal.me/bassemnomany)
 
-# [:floppy_disk: Download](https://apps.microsoft.com/detail/9MWZPXH1K9LD)
+# [:floppy_disk: Download](https://apps.microsoft.com/detail/9P74CN323T0M)
 
 Suspended N Time is now officially available on the Microsoft Store!  
 Click the badge below open directly: 
 
-<a href="https://apps.microsoft.com/detail/9MWZPXH1K9LD">
+<a href="https://apps.microsoft.com/detail/9P74CN323T0M">
   <img
     src="https://get.microsoft.com/images/en-us%20dark.svg"
     alt="Get it from Microsoft Store"
@@ -92,8 +92,8 @@ Click the badge below open directly:
 
 # Supported Devices
 It should be compatiable with any Windows PC. However, I have only tested on the following hardware:
-- MSI Claw 8 AI+ A2VM with Intel Lunar Lake.
 - Windows Desktop with AMD 7950X3D and Nvidia RTX GPU
+- Handheld PC: MSI Claw 8 AI+ A2VM with Intel Lunar Lake.
 
 # Bugs & Features
 Found a bug and want it fixed? Have an idea for a new feature?
@@ -101,9 +101,8 @@ Please [open an issue](https://github.com/BassemMohsen/SuspendedNTime/issues) in
 
 # Credits & Libraries
 - [Merrit/nyrna](https://github.com/Merrit/nyrna)
-- [chenx-dust/RyzenAdjUWP](https://github.com/chenx-dust/RyzenAdjUWP)
 
-I have also drawn some inspiration for use cases from:
+Suspended N Time have drawn some inspiration for use cases from:
 - XBox [Quick Resume](https://www.pcmag.com/how-to/how-to-switch-between-games-with-quick-resume-on-xbox-series-x-series-s)
 - Decky Load Steam Deck Plugin [Pause Game](https://github.com/popsUlfr/SDH-PauseGames)
 
@@ -112,14 +111,19 @@ I have also drawn some inspiration for use cases from:
 ❗ You cannot use Alt+Tab / Task Switcher to switch to a suspended game
 Suspended processes cannot respond to compositor signals.
 Because of this, Windows cannot complete the switch to a suspended window.
-To switch back:
-Resume the game from the Game Bar widget
-Then Alt+Tab will work normally
+**Solution** To switch back to a game:
+- Resume the game first from the Game Bar widget.
+- Then Alt+Tab or Task Switcher will work normally.
 
 ❗ Windows may show “Not Responding – Wait or End Process?”
 This is expected.
 When suspended, a game cannot respond to system messages, so Windows assumes it is frozen.
-Simply resume the game — the dialog will disappear immediately.
+**Solution**  Simply resume the game — the dialog will disappear immediately.
+
+❗ Can't close suspended game”
+This is expected.
+When suspended, a game cannot respond to terminate or close signal.
+**Solution**  Simply resume the game first— then close it after.
 
 ❗ System utilities or OEM tools may appear in the game list
 Examples:
