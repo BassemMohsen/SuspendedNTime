@@ -153,13 +153,13 @@ namespace Suspended.Backend
                 string.Equals(p, processName, StringComparison.OrdinalIgnoreCase));
         }
 
-        public static async Task SuspendForegroundApp()
+        public static async Task<int?> SuspendForegroundApp()
         {
             IntPtr hwnd = GetForegroundWindow();
             if (hwnd == IntPtr.Zero)
             {
                 Console.WriteLine("[GameSuspendController] No foreground window detected.");
-                return;
+                return null;
             }
 
             GetWindowThreadProcessId(hwnd, out uint processId);
@@ -171,13 +171,13 @@ namespace Suspended.Backend
                     if (IsWhitelisted(process.ProcessName))
                     {
                         Console.WriteLine($"[GameSuspendController] Skipping whitelisted process: {process.ProcessName}");
-                        return;
+                        return null;
                     }
 
                     if (IsProcessSuspended(process))
                     {
                         Console.WriteLine($"[GameSuspendController] Process already suspended: {process.ProcessName}");
-                        return;
+                        return null;
                     }
 
                     // Minimize the window first to avoid issues with certain games
@@ -188,14 +188,18 @@ namespace Suspended.Backend
 
                     Console.WriteLine($"[GameSuspendController] Minimized and Suspending process: {process.ProcessName} ({processId})");
                     SuspendProcessTree(process.Id);
+                    return (int)processId;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[GameSuspendController] Failed to suspend process: {ex.Message}");
+                return null;
             }
+
+            return null;
         }
-        public static async Task SuspendApp(int processId)
+        public static async Task<bool> SuspendApp(int processId)
         {
             try
             {
@@ -203,20 +207,20 @@ namespace Suspended.Backend
                 if (hwnd == IntPtr.Zero)
                 {
                     Console.WriteLine("[GameSuspendController] SuspendApp couldn't get Window handle.");
-                    return;
+                    return false;
                 }
                 using (var process = Process.GetProcessById(processId))
                 {
                     if (IsWhitelisted(process.ProcessName))
                     {
                         Console.WriteLine($"[GameSuspendController] Skipping whitelisted process: {process.ProcessName}");
-                        return;
+                        return false;
                     }
 
                     if (IsProcessSuspended(process))
                     {
                         Console.WriteLine($"[GameSuspendController] Process already suspended: {process.ProcessName}");
-                        return;
+                        return false;
                     }
 
                     // Minimize the window first to avoid issues with certain games
@@ -227,21 +231,23 @@ namespace Suspended.Backend
 
                     Console.WriteLine($"[GameSuspendController] Minimized and Suspending process: {process.ProcessName} ({processId})");
                     SuspendProcessTree(processId);
+                    return true;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[GameSuspendController] Failed to suspend process: {ex.Message}");
+                return false;
             }
         }
 
-        public static async Task ResumeForegroundApp()
+        public static async Task<bool> ResumeForegroundApp()
         {
             IntPtr hwnd = GetForegroundWindow();
             if (hwnd == IntPtr.Zero)
             {
                 Console.WriteLine("[GameSuspendController] No foreground window detected.");
-                return;
+                return false;
             }
 
             GetWindowThreadProcessId(hwnd, out uint processId);
@@ -253,7 +259,7 @@ namespace Suspended.Backend
                     if (IsWhitelisted(process.ProcessName))
                     {
                         Console.WriteLine($"[GameSuspendController] Skipping whitelisted process: {process.ProcessName}");
-                        return;
+                        return false;
                     }
 
                     Console.WriteLine($"[GameSuspendController] Resuming process: {process.ProcessName} ({processId})");
@@ -261,15 +267,19 @@ namespace Suspended.Backend
 
                     // After resuming, restore the window
                     ShowWindowAsync(hwnd, SW_RESTORE);
+                    return true;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[GameSuspendController] Failed to resume process: {ex.Message}");
+                return false;
             }
+
+            return false;
         }
 
-        public static async Task ResumeApp(int processId)
+        public static async Task<bool> ResumeApp(int processId)
         {
             try
             {
@@ -277,14 +287,14 @@ namespace Suspended.Backend
                 if (hwnd == IntPtr.Zero)
                 {
                     Console.WriteLine("[GameSuspendController] ResumeApp couldn't get Window handle.");
-                    return;
+                    return false;
                 }
                 using (var process = Process.GetProcessById(processId))
                 {
                     if (IsWhitelisted(process.ProcessName))
                     {
                         Console.WriteLine($"[GameSuspendController] Skipping whitelisted process: {process.ProcessName}");
-                        return;
+                        return false;
                     }
 
                     Console.WriteLine($"[GameSuspendController] Resuming process: {process.ProcessName} ({processId})");
@@ -292,11 +302,13 @@ namespace Suspended.Backend
 
                     // After resuming, restore the window
                     ShowWindowAsync(hwnd, SW_RESTORE);
+                    return true;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[GameSuspendController] Failed to resume process: {ex.Message}");
+                return false;
             }
         }
 

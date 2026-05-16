@@ -16,6 +16,7 @@ class ModernStandbyMonitor
     private const int SC_SUSPEND = 0xF170;
     private int autoSuspendSetting;
     private int goBackToSleepSetting;
+    private int? lastSuspendedPid = null;
 
     private readonly XNamespace ns = "http://schemas.microsoft.com/win/2004/08/events/event";
 
@@ -61,8 +62,27 @@ class ModernStandbyMonitor
         if (eventId == 506)
         {
             Console.WriteLine($"[ModernStandbyMonitor] System entered Modern Standby at {eventTime:yyyy-MM-dd HH:mm:ss}");
-            if(autoSuspendSetting == 1)
-                _ = GameSuspendController.SuspendForegroundApp();
+            if (autoSuspendSetting == 1)
+            {
+                // Await suspend to capture the suspended PID so we can resume later
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var pid = await GameSuspendController.SuspendForegroundApp();
+                        if (pid.HasValue)
+                        {
+                            lastSuspendedPid = pid.Value;
+                            Console.WriteLine($"[ModernStandbyMonitor] Recorded suspended PID: {pid.Value}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[ModernStandbyMonitor] Error suspending foreground app: {ex}");
+                    }
+                });
+            }
+
         }
         else if (eventId == 507)
         {
@@ -73,7 +93,7 @@ class ModernStandbyMonitor
                 Console.WriteLine($"[ModernStandbyMonitor] System woke up for other reason but power button");
 
                 if (goBackToSleepSetting == 1)
-                { 
+                {
                     Console.WriteLine($"[ModernStandbyMonitor] Go back go to sleep!");
 
                     // Resume foreground app, so that they can respond to SC_SUSPEND
@@ -87,7 +107,23 @@ class ModernStandbyMonitor
             {
                 // It's power button, resume foreground app
                 if (autoSuspendSetting == 1)
-                    _ = GameSuspendController.ResumeForegroundApp();
+                {
+                    // Resume the previously suspended app if we recorded one
+                    if (lastSuspendedPid.HasValue)
+                    {
+                        _ = Task.Run(async () =>
+                        {
+                            bool ok = await GameSuspendController.ResumeApp(lastSuspendedPid.Value);
+                            Console.WriteLine($"[ModernStandbyMonitor] ResumeApp({lastSuspendedPid.Value}) => {ok}");
+                            lastSuspendedPid = null;
+                        });
+                    }
+                    else
+                    {
+                        _ = GameSuspendController.ResumeForegroundApp();
+                    }
+                }
+
             }
         }
     }
