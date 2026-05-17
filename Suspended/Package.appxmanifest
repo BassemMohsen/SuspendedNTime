@@ -10,8 +10,8 @@
 
   <Identity
     Name="Suspended"
-    Publisher="CN=BassemMohsen"
-    Version="1.0.0.0" />
+    Publisher="CN=AzHP"
+    Version="1.0.6.0" />
 
   <mp:PhoneIdentity PhoneProductId="695778d8-33d0-498d-b7a2-16f87624ef42" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
@@ -22,8 +22,8 @@
   </Properties>
 
   <Dependencies>
-    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.0.0" MaxVersionTested="10.0.0.0" />
-    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.14393.0" MaxVersionTested="10.0.14393.0" />
+    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.17763.0" MaxVersionTested="10.0.17763.0" />
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.17763.0" />
   </Dependencies>
 
   <Resources>

@@ -98,7 +98,21 @@ class ModernStandbyMonitor
 
                     // Resume foreground app, so that they can respond to SC_SUSPEND
                     if (autoSuspendSetting == 1)
-                        _ = GameSuspendController.ResumeForegroundApp();
+                    {
+                        // Resume the previously suspended app if we recorded one
+                        if (lastSuspendedPid.HasValue)
+                        {
+                            _ = Task.Run(async () =>
+                            {
+                                bool ok = await GameSuspendController.ResumeApp(lastSuspendedPid.Value);
+                                Console.WriteLine($"[ModernStandbyMonitor] ResumeApp({lastSuspendedPid.Value}) => {ok}");
+                            });
+                        }
+                        else
+                        {
+                            _ = GameSuspendController.ResumeForegroundApp();
+                        }
+                    }
 
                     _ = SuspendSystem();
                 }
@@ -115,7 +129,6 @@ class ModernStandbyMonitor
                         {
                             bool ok = await GameSuspendController.ResumeApp(lastSuspendedPid.Value);
                             Console.WriteLine($"[ModernStandbyMonitor] ResumeApp({lastSuspendedPid.Value}) => {ok}");
-                            lastSuspendedPid = null;
                         });
                     }
                     else

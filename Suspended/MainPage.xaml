@@ -244,7 +244,7 @@
                             <!-- Label Text -->
                             <TextBlock
                     Grid.Column="0"
-                    Text="Suspend on focus change"
+                    Text="Suspend on focus change Sean's build: 5-16-915"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Left"
                     FontSize="18"

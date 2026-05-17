@@ -104,7 +104,13 @@ namespace Suspended.Backend
             "XboxPcApp",
             "Gamebar_Widget",
             "MSI Center M",
-            "IntelGraphicsSoftware"
+            "IntelGraphicsSoftware",
+            "Click to Do",
+            "Realtek Audio Console",
+            "Playnite",
+            "Playnite.FullscreenApp",
+            "ClickToDo",
+            "OneGameLauncher"
         };
 
         public static IntPtr GetMainWindowHandle(int pid)
